@@ -57,6 +57,12 @@ class Tuple(object):
                     self.e1 == other.e1 and self.e2 == other.e2 and self.bef_words == other.bef_words and
                     self.bet_words == other.bet_words and self.aft_words == other.aft_words)
 
+    def __hash__(self):
+        h = hash(self.e1) ^ hash(self.e2)
+        for w in self.bef_words + self.bet_words + self.aft_words:
+            h ^= hash(w)
+        return h
+
     def get_vector(self, context):
         if context == "bef":
             return self.bef_vector

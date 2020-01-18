@@ -37,7 +37,7 @@ class Snowball(object):
         """
         try:
             os.path.isfile("processed_tuples.pkl")
-            f = open("processed_tuples.pkl", "r")
+            f = open("processed_tuples.pkl", "rb")
             print("\nLoading processed tuples from disk...")
             self.processed_tuples = pickle.load(f)
             f.close()
@@ -60,7 +60,7 @@ class Snowball(object):
                         bet_tokens = word_tokenize(rel.between)
                         aft_tokens = word_tokenize(rel.after)
                         if not (bef_tokens == 0 and bet_tokens == 0 and aft_tokens == 0):
-                            t = Tuple(rel.ent1, rel.ent2, rel.sentence, rel.before, rel.between, rel.after, self.config)
+                            t = Tuple.Tuple(rel.ent1, rel.ent2, rel.sentence, rel.before, rel.between, rel.after, self.config)
                             self.processed_tuples.append(t)
             f_sentences.close()
 
@@ -72,7 +72,7 @@ class Snowball(object):
 
     def init_bootstrapp(self, tuples):
         if tuples is not None:
-            f = open(tuples, "r")
+            f = open(tuples, "rb")
             print("Loading pre-processed sentences", tuples)
             self.processed_tuples = pickle.load(f)
             f.close()
@@ -190,7 +190,7 @@ class Snowball(object):
                     # use past confidence values to calculate new confidence
                     # if parameter Wupdt < 0.5 the system trusts new examples less on each iteration
                     # which will lead to more conservative patterns and have a damping effect.
-                    if iter > 0:
+                    if i > 0:
                         t.confidence = t.confidence * self.config.wUpdt + t.confidence_old * (1 - self.config.wUpdt)
 
                 # update seed set of tuples to use in next iteration
@@ -209,8 +209,8 @@ class Snowball(object):
         f_output = open("relationships.txt", "w")
         tmp = sorted(self.candidate_tuples, key=lambda tpl: tpl.confidence, reverse=True)
         for t in tmp:
-            f_output.write("instance: "+t.e1.encode("utf8")+'\t'+t.e2.encode("utf8")+'\tscore:'+str(t.confidence)+'\n')
-            f_output.write("sentence: "+t.sentence.encode("utf8")+'\n')
+            f_output.write("instance: "+t.e1+'\t'+t.e2+'\tscore:'+str(t.confidence)+'\n')
+            f_output.write("sentence: "+t.sentence+'\n')
             # writer patterns that extracted this tuple
             patterns = set()
             for pattern in self.candidate_tuples[t]:
@@ -248,7 +248,7 @@ class Snowball(object):
         start = 0
         # Initialize: if no patterns exist, first tuple goes to first cluster
         if len(self.patterns) == 0:
-            c1 = Pattern(matched_tuples[0])
+            c1 = Pattern.Pattern(matched_tuples[0])
             self.patterns.append(c1)
             start = 1
 
@@ -269,7 +269,7 @@ class Snowball(object):
 
             # if max_similarity < min_degree_match create a new cluster having this tuple as the centroid
             if max_similarity < self.config.threshold_similarity:
-                c = Pattern(t)
+                c = Pattern.Pattern(t)
                 self.patterns.append(c)
 
             # if max_similarity >= min_degree_match add to the cluster with the highest similarity

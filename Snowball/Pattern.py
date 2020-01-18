@@ -39,6 +39,11 @@ class Pattern(object):
             return True
         else:
             return False
+    def __hash__(self):
+        h = 0
+        for t in self.tuples:
+            h ^= hash(t)
+        return h
 
     def update_confidence_2003(self, config):
         if self.positive > 0:
@@ -133,3 +138,4 @@ class Pattern(object):
                 centroid[i] = tuple(tmp)
 
         return centroid
+
